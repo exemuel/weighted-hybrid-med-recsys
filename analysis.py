@@ -27,6 +27,7 @@ def read_xml_file(file):
     infile = open(file, "r")
     contents = infile.read()
     soup = BeautifulSoup(contents, "xml")
+    list_out = []
     
     # Packager
     packager = soup.find("representedOrganization").getText().strip()
@@ -36,15 +37,59 @@ def read_xml_file(file):
     
     drugs = soup.find_all("manufacturedProduct")
     for i in drugs:
+        # Name
         name = i.find("name").getText().strip()
-        code1 = i.find("code")["displayName"]
-        code2 = i.find("code")["code"]
-        item_code = code1+":"+code2
+        
+        # Item Code (Source)
+        item_code = i.find("code")["displayName"] + ":" + i.find("code")["code"]
         numerator_unit = i.find("numerator")["unit"]
         numerator_value = i.find("numerator")["value"]
 
+        # Route of Administration
         administration = i.find("consumedIn").find("routeCode")["displayName"]
-        print(name, numerator_unit, numerator_value, item_code, administration)
+
+        # Active Ingredient/Active Moiety
+        list_activeIngredient = [e.find("name").getText().strip() for e in i.find_all("activeIngredientSubstance")]
+        
+        # Inactive Ingredient
+        list_inactiveIngredient = [e.getText().strip() for e in i.find_all("inactiveIngredientSubstance")]
+        
+        # Color
+        color = [e.getText().strip() for e in i.find_all("characteristic") if "SPLCOLOR" in str(e)]
+
+        # Score
+        score = [e.find("value")["value"]  for e in i.find_all("characteristic") if "SPLSCORE" in str(e)]
+
+        # Shape
+        shape = [e.getText().strip() for e in i.find_all("characteristic") if "SPLSHAPE" in str(e)]
+
+        # Size
+        size = [e.find("value")["value"] + " " + e.find("value")["unit"] for e in i.find_all("characteristic") if "SPLSIZE" in str(e)][0]
+
+        # Imprint Code
+        imprint = [e.getText().strip() for e in i.find_all("characteristic") if "SPLIMPRINT" in str(e)][0]
+        
+        # Coating
+        coating = [e.find("value")["value"] for e in i.find_all("characteristic") if "SPLCOATING" in str(e)][0]
+
+        # Symbol
+        symbol = [e.find("value")["value"] for e in i.find_all("characteristic") if "SPLSYMBOL" in str(e)][0]
+
+        # Packaging Item Code
+        pack_item_code = i.find("containerPackagedMedicine").find("code")["code"] + ":" + i.find("containerPackagedMedicine").find("code")["displayName"]
+
+        # Packaging Package Description
+        p_amt = i.find("asContent").find("translation")["value"] + " " + i.find("asContent").find("translation")["displayName"]
+        p_frm = i.find("containerPackagedMedicine").find("formCode")["displayName"]
+        pack_description = p_amt + " in " + p_frm
+
+        list_tmp = [packager, category, name, numerator_unit, numerator_value, 
+                    item_code, administration, list_activeIngredient, 
+                    list_inactiveIngredient, color, score, shape, size, 
+                    imprint, coating, symbol,  pack_item_code, pack_description]
+        list_out.append(list_tmp)
+
+    return list_out
 
 def main():
     # # path to folder which needs to be zipped
@@ -53,11 +98,20 @@ def main():
     # # calling function to get all file paths in the directory
     # file_paths = get_all_file_paths(directory)
 
-    # print(file_paths[1])
+    # demo
     # x = "data\\dailymed\\prescription\\20060131_dffb4544-0e47-40cd-9baa-d622075838cc\\dffb4544-0e47-40cd-9baa-d622075838cc.xml"
     x = "data\\dailymed\\prescription\\20060131_ABD6ECF0-DC8E-41DE-89F2-1E36ED9D6535\\ABD6ECF0-DC8E-41DE-89F2-1E36ED9D6535.xml"
     
-    read_xml_file(x)
+    columns = ["packager", "category", "name", "numerator_unit", "numerator_value", 
+                    "item_code", "administration", "active_ingredient", 
+                    "inactive_ingredient", "color", "score", "shape", "size", 
+                    "imprint", "coating", "symbol",  "pack_item_code", "pack_description"]
+    df_drugs = pd.DataFrame(columns=columns)
+
+    lt = read_xml_file(x)
+    for i in lt:
+        df_drugs.loc[len(df_drugs)] = i
+    print(df_drugs)
     
 if __name__ == "__main__":
     main()
