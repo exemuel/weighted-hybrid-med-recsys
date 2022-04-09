@@ -9,10 +9,12 @@ from tqdm import tqdm
 import xml.etree.ElementTree as ET
 
 # function to clean string
-def cleaning_string(txt):
-    txt = txt.strip().replace('\n', '')
-    txt = re.sub(r"\s\s+" , "", txt)
-    return txt
+def cleaning_string(string):
+    # mengganti \n menjadi empty string
+    string = string.strip().replace('\n', '')
+    # mengganti sekuens whitespace menjadi empty string
+    string = re.sub(r"\s\s+" , "", string)
+    return string
 
 def get_all_file_paths(directory):
     # initializing empty file paths list
@@ -48,12 +50,12 @@ def read_xml_file(filepath):
     drugs = soup.find_all("manufacturedProduct")
     for i in drugs:
         # Sub Name
-        sub_name = "" if i.find("name") == None else i.find("name").getText().strip()
+        sub_name = "" if i.find("name") == None else cleaning_string(i.find("name").getText())
         if sub_name is "":
             break
         
         # Item Code (Source)
-        item_code_src = ""
+        item_code = ""
         tmp = i.find("code")
         if tmp.has_attr("displayName"):
             item_code_src = i.find("code")["displayName"] + ":"
@@ -122,43 +124,66 @@ def read_xml_file(filepath):
                     list_tmp.append("" if j.find("denominator") == None else j.find("denominator")["unit"])
                     list_inactiveIngredient.append(list_tmp)
         
-        print(list_inactiveIngredient)
+        color = ""
+        score = ""
+        shape = ""
+        size = ""
+        imprint = ""
+        coating = ""
+        symbol = ""
+        for j in i.find_all("characteristic"):
+            list_tmp = []
+            # Color
+            if "SPLCOLOR" in str(j):
+                color = cleaning_string(j.getText())
+            
+            # Score
+            elif "SPLSCORE" in str(j):
+                score = j.find("value")["value"]
+            
+            # Shape
+            elif "SPLSHAPE" in str(j):
+                shape = cleaning_string(j.getText())
+
+            # Size
+            elif "SPLSIZE" in str(j):
+                size = j.find("value")["value"]
+            
+            # Imprint Code
+            elif "SPLIMPRINT" in str(j):
+                imprint = cleaning_string(j.getText())
+            
+            # Coating
+            elif "SPLCOATING" in str(j):
+                coating = j.find("value")["value"]
+            
+            # Symbol
+            elif "SPLSYMBOL" in str(j):
+                symbol = j.find("value")["value"]
+
+        # Packaging Item Code
+        pack_item_code = ""
+        tmp_a = i.find("asContent").find("code")
+        if tmp_a != None:
+            if tmp_a.has_attr("code"):
+                pack_item_code = i.find("asContent").find("code")["code"]
+
+        # Packaging Package Description
+        pack_quantity = ""
+        pack_unit = ""
+        if i.find("asContent").find("quantity") != None:
+            pack_quantity = "" if i.find("asContent").find("quantity").find("translation") == None else i.find("asContent").find("quantity").find("translation")["value"]
+            pack_unit = "" if i.find("asContent").find("quantity").find("translation") == None else i.find("asContent").find("quantity").find("translation")["displayName"]
         
-    #     # Color
-    #     color = try_or([e.getText().strip() for e in i.find_all("characteristic") if "SPLCOLOR" in str(e)], [])
+        pack_container = ""
+        if i.find("asContent").find("containerPackagedMedicine") != None:
+            pack_container = "" if i.find("containerPackagedMedicine").find("formCode") == None else i.find("containerPackagedMedicine").find("formCode")["displayName"]
 
-    #     # Score
-    #     score = try_or([e.find("value")["value"]  for e in i.find_all("characteristic") if "SPLSCORE" in str(e)], [])
-
-    #     # Shape
-    #     shape = try_or([e.getText().strip() for e in i.find_all("characteristic") if "SPLSHAPE" in str(e)], [])
-
-    #     # Size
-    #     size = try_or([e.find("value")["value"] + " " + e.find("value")["unit"] for e in i.find_all("characteristic") if "SPLSIZE" in str(e)][0], "")
-
-    #     # Imprint Code
-    #     imprint = try_or([e.getText().strip() for e in i.find_all("characteristic") if "SPLIMPRINT" in str(e)][0], "")
-        
-    #     # Coating
-    #     coating = try_or([e.find("value")["value"] for e in i.find_all("characteristic") if "SPLCOATING" in str(e)][0], "")
-
-    #     # Symbol
-    #     symbol = try_or([e.find("value")["value"] for e in i.find_all("characteristic") if "SPLSYMBOL" in str(e)][0], "")
-
-    #     # Packaging Item Code
-    #     pack_item_code_src = try_or(":" + i.find("asContent").find("translation")["displayName"], "")
-    #     pack_item_code = try_or(i.find("containerPackagedMedicine").find("code")["code"] + pack_item_code_src, "")
-
-    #     # Packaging Package Description
-    #     p_amt = try_or(i.find("asContent").find("translation")["value"] + " " + i.find("asContent").find("translation")["displayName"], "")
-    #     p_frm = try_or(i.find("containerPackagedMedicine").find("formCode")["displayName"], "")
-    #     pack_description = p_amt + " in " + p_frm
-
-    # #     list_tmp = [packager, category, name, numerator_unit, numerator_value, 
-    # #                 item_code, administration, list_activeIngredient, 
-    # #                 list_inactiveIngredient, color, score, shape, size, 
-    # #                 imprint, coating, symbol,  pack_item_code, pack_description]
-    # #     list_out.append(list_tmp)
+        list_tmp = [name, packager, category, sub_name,  
+                    item_code, administration, list_activeIngredient, 
+                    list_inactiveIngredient, color, score, shape, size, 
+                    imprint, coating, symbol,  pack_item_code, pack_quantity, pack_unit, pack_container]
+        list_out.append(list_tmp)
 
     return list_out
 
@@ -186,13 +211,14 @@ def main():
     directory = '.\\data\\dailymed\\prescription'
 
     # for debug
-    # x =".\\data\\dailymed\\prescription\\20090520_aaeffe62-b538-43ca-a3b9-47e28b765d89\\f7d4e8ff-edb0-4e5c-a1b6-72635e9b2e3a.xml"
+    x =".\\data\\dailymed\\prescription\\20090520_aaeffe62-b538-43ca-a3b9-47e28b765d89\\f7d4e8ff-edb0-4e5c-a1b6-72635e9b2e3a.xml"
     # x = ".\\data\\dailymed\\prescription\\20070216_7C6CA6E4-BE08-4BEA-8553-6B3374991A9E\\7C6CA6E4-BE08-4BEA-8553-6B3374991A9E.xml"
     # x = ".\\data\\dailymed\\prescription\\20090701_89245260-c470-4a4c-8ef6-12598dc28e4c\\279b92ac-8e31-4b04-8983-6f161f5b709c.xml"
-    x = ".\\data\\dailymed\\prescription\\20060131_dffb4544-0e47-40cd-9baa-d622075838cc\\dffb4544-0e47-40cd-9baa-d622075838cc.xml"
-    read_xml_file(x)
+    # x = ".\\data\\dailymed\\prescription\\20060131_dffb4544-0e47-40cd-9baa-d622075838cc\\dffb4544-0e47-40cd-9baa-d622075838cc.xml"
+    list_d = read_xml_file(x)
+    print(list_d)
 
-    # calling function to get all file paths in the directory
+    # # calling function to get all file paths in the directory
     # file_paths = get_all_file_paths(directory)
 
     # df_drugs = make_df_drugs(file_paths)
