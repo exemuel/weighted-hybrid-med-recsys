@@ -48,6 +48,7 @@ def parse_xml(path):
                                                         list_tag.append(nilai12)
                                                         for nilai13 in nilai12:
                                                             log.write("\t"*12 + nilai13.tag.split("}",1)[1] + '\n')
+                                                            list_tag.append(nilai13)
 
     print("Periksa " + out_path)
     return list_tag
