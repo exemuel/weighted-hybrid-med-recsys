@@ -2,50 +2,60 @@ import xml.etree.ElementTree as ET
 import json
 
 def parse_xml(path):
-    # inisialisasi struktur data dictionary
-    dict_tag = {}
+    # inisialisasi struktur data list
+    list_tag = []
 
     tree = ET.parse(path)
     root = tree.getroot()
+    out_path = "log_" + str(path.split("\\")[5].split(".")[0]) + ".txt"
 
-    for nilai in root:
-        dict_tag2 = {}
-        for nilai2 in nilai: 
-            dict_tag3 = {}
-            for nilai3 in nilai2:
-                dict_tag4 = {}
-                for nilai4 in nilai3:
-                    dict_tag5 = {}
-                    for nilai5 in nilai4:
-                        dict_tag6 = {}
-                        for nilai6 in nilai5:
-                            dict_tag7 = {}
-                            for nilai7 in nilai6:
-                                dict_tag8 = {}
-                                for nilai8 in nilai7:
-                                    dict_tag9 = {}
-                                    for nilai9 in nilai8:
-                                        dict_tag10 = {}
-                                        for nilai10 in nilai9:
-                                            dict_tag10[nilai10.tag.split("}",1)[1]] = nilai10.tag.split("}",1)[1]
-                                        dict_tag9[nilai9.tag.split("}",1)[1]] = dict_tag10
-                                    dict_tag8[nilai8.tag.split("}",1)[1]] = dict_tag9
-                                dict_tag7[nilai7.tag.split("}",1)[1]] = dict_tag8
-                            dict_tag6[nilai6.tag.split("}",1)[1]] = dict_tag7
-                        dict_tag5[nilai5.tag.split("}",1)[1]] = dict_tag6
-                    dict_tag4[nilai4.tag.split("}",1)[1]] = dict_tag5
-                dict_tag3[nilai3.tag.split("}",1)[1]] = dict_tag4
-            dict_tag2[nilai2.tag.split("}",1)[1]] = dict_tag3
-        dict_tag[nilai.tag.split("}",1)[1]] = dict_tag2
+    with open(out_path, 'w') as log:
+        for nilai1 in root:
+            log.write(nilai1.tag.split("}",1)[1] + '\n')
+            list_tag.append(nilai1)
+            for nilai2 in nilai1:
+                log.write("\t"*1 + nilai2.tag.split("}",1)[1] + '\n')
+                list_tag.append(nilai2)
+                for nilai3 in nilai2:
+                    log.write("\t"*2 + nilai3.tag.split("}",1)[1] + '\n')
+                    list_tag.append(nilai3)
+                    for nilai4 in nilai3:
+                        log.write("\t"*3 + nilai4.tag.split("}",1)[1] + '\n')
+                        list_tag.append(nilai4)
+                        for nilai5 in nilai4:
+                            log.write("\t"*4 + nilai5.tag.split("}",1)[1] + '\n')
+                            list_tag.append(nilai5)
+                            for nilai6 in nilai5:
+                                log.write("\t"*5 + nilai6.tag.split("}",1)[1] + '\n')
+                                list_tag.append(nilai6)
+                                for nilai7 in nilai6:
+                                    log.write("\t"*6 + nilai7.tag.split("}",1)[1] + '\n')
+                                    list_tag.append(nilai7)
+                                    for nilai8 in nilai7:
+                                        log.write("\t"*7 + nilai8.tag.split("}",1)[1] + '\n')
+                                        list_tag.append(nilai8)
+                                        for nilai9 in nilai8:
+                                            log.write("\t"*8 + nilai9.tag.split("}",1)[1] + '\n')
+                                            list_tag.append(nilai9)
+                                            for nilai10 in nilai9:
+                                                log.write("\t"*9 + nilai10.tag.split("}",1)[1] + '\n')
+                                                list_tag.append(nilai10)
+                                                for nilai11 in nilai10:
+                                                    log.write("\t"*10 + nilai11.tag.split("}",1)[1] + '\n')
+                                                    list_tag.append(nilai11)
+                                                    for nilai12 in nilai11:
+                                                        log.write("\t"*11 + nilai12.tag.split("}",1)[1] + '\n')
+                                                        list_tag.append(nilai12)
+                                                        for nilai13 in nilai12:
+                                                            log.write("\t"*12 + nilai13.tag.split("}",1)[1] + '\n')
 
-    print(json.dumps(dict_tag, sort_keys=False, indent=4))
-    return dict_tag
+    print("Periksa " + out_path)
+    return list_tag
 
-def compare_dict(dict1, dict2):
-    print("Berkas XML ke-1 dan berkas XML ke-2", "sama" if dict1 == dict2 else "tidak sama")
+def compare_list(list1, list2):
+    print("Berkas XML ke-1 dan berkas XML ke-2", "sama" if list1 == list2 else "tidak sama")
 
-source = ""
-filepaths = [".\\data\\dailymed\\prescription\\20090520_aaeffe62-b538-43ca-a3b9-47e28b765d89\\f7d4e8ff-edb0-4e5c-a1b6-72635e9b2e3a.xml",
+filepaths = [".\\data\\dailymed\\prescription\\20060131_ABD6ECF0-DC8E-41DE-89F2-1E36ED9D6535\\ABD6ECF0-DC8E-41DE-89F2-1E36ED9D6535.xml",
              ".\\data\\dailymed\\prescription\\20070216_7C6CA6E4-BE08-4BEA-8553-6B3374991A9E\\7C6CA6E4-BE08-4BEA-8553-6B3374991A9E.xml"]
 
-compare_dict(parse_xml(filepaths[0]), parse_xml(filepaths[1]))
+compare_list(parse_xml(filepaths[0]), parse_xml(filepaths[1]))
