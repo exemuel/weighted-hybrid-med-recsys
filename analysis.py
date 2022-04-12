@@ -4,9 +4,9 @@ import re
 
 # 3rd party libraries
 import pandas as pd
+import numpy as np
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-import xml.etree.ElementTree as ET
 
 # function to clean string
 def cleaning_string(string):
@@ -182,28 +182,28 @@ def read_xml_file(filepath):
         list_tmp = [name, packager, category, sub_name,  
                     item_code, administration, list_activeIngredient, 
                     list_inactiveIngredient, color, score, shape, size, 
-                    imprint, coating, symbol,  pack_item_code, pack_quantity, pack_unit, pack_container]
+                    imprint, coating, symbol, pack_item_code, pack_quantity, pack_unit, pack_container]
         list_out.append(list_tmp)
 
     return list_out
 
 def make_df_drugs(paths):
-    columns = ["packager", "category", "name", "numerator_unit", "numerator_value", 
-                    "item_code", "administration", "active_ingredient", 
-                    "inactive_ingredient", "color", "score", "shape", "size", 
-                    "imprint", "coating", "symbol",  "pack_item_code", "pack_description"]
+    columns = ["name", "packager", "category", "sub_name",  
+               "item_code", "administration", "list_activeIngredient", 
+               "list_inactiveIngredient", "color", "score", "shape", "size", 
+               "imprint", "coating", "symbol", "pack_item_code", "pack_quantity", "pack_unit", "pack_container"]
     df_drugs = pd.DataFrame(columns=columns)
 
     print("\nMaking Drugs DataFrame in progress...")
-    for i in paths:
+    for i in tqdm(paths):
         try:
             list_drug = read_xml_file(i)
-        except Exception as e:
-            print(e)
-            print(i)
-            break
-        # for i in lt:
-        #     df_drugs.loc[len(df_drugs)] = i
+        except:
+            m = np.empty((1,19,))
+            m[:] = np.nan
+            list_drug = m.tolist()
+        for i in list_drug:
+            df_drugs.loc[len(df_drugs)] = i
     return df_drugs
 
 def main():
@@ -211,19 +211,19 @@ def main():
     directory = '.\\data\\dailymed\\prescription'
 
     # for debug
-    x =".\\data\\dailymed\\prescription\\20090520_aaeffe62-b538-43ca-a3b9-47e28b765d89\\f7d4e8ff-edb0-4e5c-a1b6-72635e9b2e3a.xml"
+    # x =".\\data\\dailymed\\prescription\\20090520_aaeffe62-b538-43ca-a3b9-47e28b765d89\\f7d4e8ff-edb0-4e5c-a1b6-72635e9b2e3a.xml"
     # x = ".\\data\\dailymed\\prescription\\20070216_7C6CA6E4-BE08-4BEA-8553-6B3374991A9E\\7C6CA6E4-BE08-4BEA-8553-6B3374991A9E.xml"
     # x = ".\\data\\dailymed\\prescription\\20090701_89245260-c470-4a4c-8ef6-12598dc28e4c\\279b92ac-8e31-4b04-8983-6f161f5b709c.xml"
     # x = ".\\data\\dailymed\\prescription\\20060131_dffb4544-0e47-40cd-9baa-d622075838cc\\dffb4544-0e47-40cd-9baa-d622075838cc.xml"
-    list_d = read_xml_file(x)
-    print(list_d)
+    # list_d = read_xml_file(x)
+    # print(list_d)
 
-    # # calling function to get all file paths in the directory
-    # file_paths = get_all_file_paths(directory)
+    # calling function to get all file paths in the directory
+    file_paths = get_all_file_paths(directory)
 
-    # df_drugs = make_df_drugs(file_paths)
-    # print(df_drugs.head())
-    # print(df_drugs.tail())
+    df_drugs = make_df_drugs(file_paths)
+    print(df_drugs.head())
+    print(df_drugs.tail())
 
     
 if __name__ == "__main__":
