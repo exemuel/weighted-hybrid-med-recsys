@@ -1,62 +1,93 @@
 import xml.etree.ElementTree as ET
 import json
+import pprint
+
+def get_recurse(root, indent, list):
+    indent += 1
+
+    list.append((indent, root.tag.split("}",1)[1]))
+    if len(root)>0:
+        for child in root:
+            get_recurse(child, indent, list)
+    else:
+        return
+    return list
+
+def split(data):
+    list_tmp = []
+    list_subtmp = []
+
+    for id, val in enumerate(data):
+        list_subtmp.append(val)
+        if id < len(data)-1:
+            if val[0] == data[id+1][0]:
+                list_tmp.append(list_subtmp)
+                list_subtmp = []
+        else:
+            list_tmp.append(list_subtmp)
+            
+    return list_tmp
 
 def parse_xml(path):
-    # inisialisasi struktur data list
-    list_tag = []
+    # inisialisasi struktur data dict
+    dict_tag = {}
 
     tree = ET.parse(path)
     root = tree.getroot()
     out_path = "log_" + str(path.split("\\")[5].split(".")[0]) + ".txt"
 
-    with open(out_path, 'w') as log:
-        for nilai1 in root:
-            log.write(nilai1.tag.split("}",1)[1] + '\n')
-            list_tag.append(nilai1)
-            for nilai2 in nilai1:
-                log.write("\t"*1 + nilai2.tag.split("}",1)[1] + '\n')
-                list_tag.append(nilai2)
-                for nilai3 in nilai2:
-                    log.write("\t"*2 + nilai3.tag.split("}",1)[1] + '\n')
-                    list_tag.append(nilai3)
-                    for nilai4 in nilai3:
-                        log.write("\t"*3 + nilai4.tag.split("}",1)[1] + '\n')
-                        list_tag.append(nilai4)
-                        for nilai5 in nilai4:
-                            log.write("\t"*4 + nilai5.tag.split("}",1)[1] + '\n')
-                            list_tag.append(nilai5)
-                            for nilai6 in nilai5:
-                                log.write("\t"*5 + nilai6.tag.split("}",1)[1] + '\n')
-                                list_tag.append(nilai6)
-                                for nilai7 in nilai6:
-                                    log.write("\t"*6 + nilai7.tag.split("}",1)[1] + '\n')
-                                    list_tag.append(nilai7)
-                                    for nilai8 in nilai7:
-                                        log.write("\t"*7 + nilai8.tag.split("}",1)[1] + '\n')
-                                        list_tag.append(nilai8)
-                                        for nilai9 in nilai8:
-                                            log.write("\t"*8 + nilai9.tag.split("}",1)[1] + '\n')
-                                            list_tag.append(nilai9)
-                                            for nilai10 in nilai9:
-                                                log.write("\t"*9 + nilai10.tag.split("}",1)[1] + '\n')
-                                                list_tag.append(nilai10)
-                                                for nilai11 in nilai10:
-                                                    log.write("\t"*10 + nilai11.tag.split("}",1)[1] + '\n')
-                                                    list_tag.append(nilai11)
-                                                    for nilai12 in nilai11:
-                                                        log.write("\t"*11 + nilai12.tag.split("}",1)[1] + '\n')
-                                                        list_tag.append(nilai12)
-                                                        for nilai13 in nilai12:
-                                                            log.write("\t"*12 + nilai13.tag.split("}",1)[1] + '\n')
-                                                            list_tag.append(nilai13)
+    list=[]
+    indent = 0
+    list_tag = get_recurse(root, indent, list)  
+    print(split(list_tag))
 
-    print("Periksa " + out_path)
-    return list_tag
 
-def compare_list(list1, list2):
-    print("Berkas XML ke-1 dan berkas XML ke-2", "sama" if list1 == list2 else "tidak sama")
+    # list_tmp = [(1,"set"), (2,"set"), (1,"uni")]
+    # dict_tmp = {}
+    # vt = 0
+    # for id, val in enumerate(list_tmp):
+    #     if id > 0:
+    #         if list_tmp[id][0] - list_tmp[id-1][0] == 1:
+    #             vt=0
+    #             dict_tmp[(vt,val[1])] = val[1]
+    #         elif list_tmp[id][0] - list_tmp[id-1][0] == -1:
+    #             vt+=1
+    #             dict_tmp[(vt,val[1])] = val[1]
+    #     else:
+    #         dict_tmp[(vt,val[1])] = val[1]
+    # print(dict_tmp)
+
+    # for id1, nilai1 in enumerate(root):
+    #     dict_tag2 = {}
+    #     for id2, nilai2 in enumerate(nilai1):
+    #         dict_tag3 = {}
+    #         for id3, nilai3 in enumerate(nilai2):
+    #             dict_tag3[id3] = nilai3.tag.split("}",1)[1]
+    #         dict_tag2[(id2, nilai2.tag.split("}",1)[1])] = dict_tag3
+    #     dict_tag[(id1, nilai1.tag.split("}",1)[1])] = dict_tag2
+    
+    # pp = pprint.PrettyPrinter(depth=4)
+    # pp.pprint(dict_tag)
+
+    # # dict_norm = json.dumps({k: v for k, v in dict_tag.items()})
+    # dict_norm = {k[1]: v for k, v in dict_tag.items()}
+
+    # # Serializing json
+    # json_object = json.dumps(dict_norm, sort_keys=False, indent=4)
+    
+    # # Writing to json file
+    # with open(out_path, "w") as outfile:
+    #     outfile.write(json_object)
+    # print("Periksa " + out_path)
+    # return dict_norm
+
+def compare_dict(dict1, dict2):
+    print("Berkas XML ke-1 dan berkas XML ke-2", "sama" if dict1 == dict2 else "tidak sama")
 
 filepaths = [".\\data\\dailymed\\prescription\\20060131_ABD6ECF0-DC8E-41DE-89F2-1E36ED9D6535\\ABD6ECF0-DC8E-41DE-89F2-1E36ED9D6535.xml",
              ".\\data\\dailymed\\prescription\\20070216_7C6CA6E4-BE08-4BEA-8553-6B3374991A9E\\7C6CA6E4-BE08-4BEA-8553-6B3374991A9E.xml"]
 
-compare_list(parse_xml(filepaths[0]), parse_xml(filepaths[1]))
+# print(parse_xml(filepaths[0]))
+parse_xml(filepaths[0])
+
+# compare_dict(parse_xml(filepaths[0]), parse_xml(filepaths[1]))
