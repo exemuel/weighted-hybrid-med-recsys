@@ -25,8 +25,15 @@ def split(data):
                 list_subtmp = []
         else:
             list_tmp.append(list_subtmp)
-            
-    return list_tmp
+
+    d = {}
+    for path in list_tmp:
+        current_level = d
+        for part in path:
+            if part not in current_level:
+                current_level[part] = {}
+            current_level = current_level[part]        
+    return d
 
 def parse_xml(path):
     # inisialisasi struktur data dict
@@ -38,9 +45,10 @@ def parse_xml(path):
 
     list=[]
     indent = 0
-    list_tag = get_recurse(root, indent, list)  
-    print(split(list_tag))
+    list_tag = get_recurse(root, indent, list)
 
+    pp = pprint.PrettyPrinter(depth=4)
+    pp.pprint(split(list_tag))
 
     # list_tmp = [(1,"set"), (2,"set"), (1,"uni")]
     # dict_tmp = {}
