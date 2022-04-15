@@ -14,25 +14,56 @@ def get_recurse(root, indent, list):
     return list
 
 def split(data):
+    dictt = {}
+    dict_tmp = {}
     list_tmp = []
     list_subtmp = []
+    idt = 0
 
     for id, val in enumerate(data):
-        list_subtmp.append(val)
-        if id < len(data)-1:
-            if val[0] == data[id+1][0]:
-                list_tmp.append(list_subtmp)
-                list_subtmp = []
+        print(val)
+        # print(val)
+        if id == 0:
+            dict_tmp[val] = {}
         else:
-            list_tmp.append(list_subtmp)
+            if val[0] - data[id-1][0] == 1:
+                if len(dict_tmp) < 0:
+                    dictt = dict_tmp
+                    dict_tmp = {}
+                    dict_tmp[val] = {}
+                else:
+
+            elif val[0] - data[id-1][0] == 0:
+                dict_tmp[val] = {}
+            else:
+                dictt[list(dictt.keys())[0]] = dict_tmp
+            
+            # dictt[val[0], val[1]] = dictt
+        # if id == 0:
+        #     dictt[idt, val[1]] = {}
+        
+        if id == 4:
+            break
+        
+        # if id == 1:
+        #     break
+        # if id < len(data)-1:
+        #     if val[0] == data[id+1][0]:
+        #         list_tmp.append(list_subtmp)
+        #         list_subtmp = []
+        #     elif val[0] - data[id+1][0] == -1:
+        #         list_tmp.append(list_subtmp)
+        # else:
+        #     list_tmp.append(list_subtmp)
+    print(dictt)
 
     d = {}
-    for path in list_tmp:
-        current_level = d
-        for part in path:
-            if part not in current_level:
-                current_level[part] = {}
-            current_level = current_level[part]        
+    # for path in list_tmp:
+    #     current_level = d
+    #     for part in path:
+    #         if part not in current_level:
+    #             current_level[part] = {}
+    #         current_level = current_level[part]        
     return d
 
 def parse_xml(path):
