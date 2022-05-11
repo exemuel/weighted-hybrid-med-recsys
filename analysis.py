@@ -51,7 +51,7 @@ def read_xml_file(filepath):
     for i in drugs:
         # Sub Name
         sub_name = "" if i.find("name") == None else cleaning_string(i.find("name").getText())
-        if sub_name is "":
+        if sub_name == "":
             break
         
         # Item Code (Source)
@@ -60,7 +60,7 @@ def read_xml_file(filepath):
         if tmp.has_attr("displayName"):
             item_code_src = i.find("code")["displayName"] + ":"
         item_code = item_code_src + "" if i.find("code") == None else i.find("code")["code"]
-        if item_code is "":
+        if item_code == "":
             break
 
         # Route of Administration
@@ -77,7 +77,7 @@ def read_xml_file(filepath):
         # Active Ingredient/Active Moiety
         list_activeIngredient = []
         tmp_a = i.find_all("activeIngredient")
-        if len(tmp_a) is 0:
+        if len(tmp_a) == 0:
             tmp_a = i.find_all("ingredient")
             for j in tmp_a:
                 if "ACTIB" in str(j):
@@ -188,13 +188,12 @@ def read_xml_file(filepath):
     return list_out
 
 def make_df_drugs(paths):
-    columns = ["name", "packager", "category", "sub_name",  
-               "item_code", "administration", "list_activeIngredient", 
-               "list_inactiveIngredient", "color", "score", "shape", "size", 
-               "imprint", "coating", "symbol", "pack_item_code", "pack_quantity", "pack_unit", "pack_container"]
+    columns = ["Name", "Packager", "Category", "SubName",  
+               "ItemCode", "Administration", "ListActiveIngredient", 
+               "ListInactiveIngredient", "Color", "Score", "Shape", "Size", 
+               "Imprint", "Coating", "Symbol", "PackItemCode", "PackQuantity", "PackUnit", "PackContainer"]
     df_drugs = pd.DataFrame(columns=columns)
 
-    print("\nMaking Drugs DataFrame in progress...")
     for i in tqdm(paths):
         try:
             list_drug = read_xml_file(i)
